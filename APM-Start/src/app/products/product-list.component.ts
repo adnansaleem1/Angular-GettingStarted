@@ -1,27 +1,42 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IProduct } from './product';
+import { ProductService } from './product.service';
 
 @Component({
     selector: 'pm-products',
-    templateUrl: './product-list.component.html'
+    templateUrl: './product-list.component.html',
+
 })
-export class ProductListComponent {
-    listFilter: string;
-    pageTitle: string= 'Product List';
-    showImage: boolean= true;
-    products: IProduct[]= [{
-        'productId': 1,
-        'productName': 'Leaf Rake',
-        'productCode': 'GDN-0011',
-        'releaseDate': 'March 19, 2016',
-        'description': 'Leaf rake with 48-inch wooden handle.',
-        'price': 19.95,
-        'starRating': 3.2,
-        'imageUrl': 'http://openclipart.org/image/300px/svg_to_png/26215/Anonymous_Leaf_Rake.png'
-    }];
-    imageWidth: number= 30;
-    imageMargin: number= 30;
+export class ProductListComponent implements OnInit {
+
+
+    _listFilter: string = '';
+    FilterList: IProduct[]=[];
+    set listFilter(value: string) {
+        this._listFilter = value;
+        this.FilterList = this._listFilter ? this.performFilter(value) : this.products;
+    }
+    pageTitle: string = 'Product List';
+    showImage: boolean = true;
+    products: IProduct[]=[] ;
+    imageWidth: number = 30;
+    imageMargin: number = 30;
+    constructor(private _productService:ProductService) {
+        
+    }
     toggleImage() {
         this.showImage = !this.showImage;
+    }
+    ngOnInit(): void {
+        this._productService.getProducts().subscribe(data=>this.FilterList=this.products= data);
+        this.FilterList = this.products;
+        console.log('In it Done');
+    }
+    fromChild(text: string): void {
+        console.log(text);
+    }
+    performFilter(filter: string): IProduct[] {
+        filter = filter.toLocaleLowerCase();
+        return this.products.filter((product: IProduct) => product.productName.toLocaleLowerCase().indexOf(filter) != -1);
     }
 }
